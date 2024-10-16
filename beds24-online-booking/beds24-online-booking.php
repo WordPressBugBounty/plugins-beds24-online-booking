@@ -3,7 +3,7 @@
 Plugin Name: Beds24 Online Booking
 Plugin URI: https://beds24.com
 Description: Beds24.com is a full featured online booking engine. The system is very flexible with many options for customization. The Beds24.com online booking system and channel manager is suitable for any type of accommodation such as hotels, motels, B&B's, hostels, vacation rentals, holiday homes, campgrounds and property management companies selling multiple properties as well as selling extras like tickets or tours. The plugin is free to use but you do need an account with Beds24.com. A free trial account is available <a href="https://beds24.com/join.html" target="_blank">here</a>
-Version: 2.0.25
+Version: 2.0.26
 Author: Mark Kinchin
 Author URI: https://beds24.com
 License: GPL2 or later
@@ -194,7 +194,7 @@ if (isset($atts['ownerid']))
 else if (get_post_meta($postid, 'ownerid', true)>0)
 	$ownerid = get_post_meta($postid, 'ownerid', true);
 else
-	$ownerid = get_option('beds24_ownerid');
+	$ownerid = intval(get_option('beds24_ownerid'));
 
 if ($ownerid > 0)
 	$owner = '&amp;ownerid='.intval($ownerid);
@@ -212,7 +212,7 @@ else if (get_post_meta($postid, 'propid', true)>0 && !isset($atts['ownerid']))
 else if (get_query_var('propid')>0 && !isset($atts['ownerid']))
   $propid = get_query_var('propid');
 else if (!isset($atts['ownerid']))
-	$propid = get_option('beds24_propid');
+	$propid = intval(get_option('beds24_propid'));
 
 if ($propid > 0)
 	$prop = '&amp;propid='.intval($propid);
@@ -227,10 +227,11 @@ if (isset($atts['roomid']))
 else if (get_post_meta($postid, 'roomid', true)>0)
 	$roomid = get_post_meta($postid, 'roomid', true);
 else if (get_query_var('roomid')>0)
-  $roomid = get_query_var('roomid');
+    $roomid = get_query_var('roomid');
 else
-	$roomid = get_option('beds24_roomid');
+	$roomid = intval(get_option('beds24_roomid'));
 
+$roomid = intval($roomid);
 if ($roomid > 0)
 	$room = '&amp;roomid='.intval($roomid);
 else if (isset($atts['roomid']))
