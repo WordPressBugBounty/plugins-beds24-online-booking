@@ -3,7 +3,7 @@
 Plugin Name: Beds24 Online Booking
 Plugin URI: https://beds24.com
 Description: Beds24.com is a full featured online booking engine. The system is very flexible with many options for customization. The Beds24.com online booking system and channel manager is suitable for any type of accommodation such as hotels, motels, B&B's, hostels, vacation rentals, holiday homes, campgrounds and property management companies selling multiple properties as well as selling extras like tickets or tours. The plugin is free to use but you do need an account with Beds24.com. A free trial account is available <a href="https://beds24.com/join.html" target="_blank">here</a>
-Version: 2.0.26
+Version: 2.0.28
 Author: Mark Kinchin
 Author URI: https://beds24.com
 License: GPL2 or later
@@ -186,13 +186,20 @@ return beds24_booking_page($atts);
 
 function beds24_booking_page($atts)
 {
+
+foreach ($atts as &$item) {
+	if (is_string($item)) {
+		$item = esc_html($item);
+	}
+}
+	
 $postid = get_the_ID();
 
 //ownerid
 if (isset($atts['ownerid']))
-	$ownerid = $atts['ownerid'];
+	$ownerid = sanitize_text_field($atts['ownerid']);
 else if (get_post_meta($postid, 'ownerid', true)>0)
-	$ownerid = get_post_meta($postid, 'ownerid', true);
+	$ownerid = sanitize_text_field(get_post_meta($postid, 'ownerid', true));
 else
 	$ownerid = intval(get_option('beds24_ownerid'));
 
@@ -204,34 +211,33 @@ else
 	$owner = '';
 
 //propid
-$propid = false;
-if (isset($atts['propid']))
-	$propid = $atts['propid'];
-else if (get_post_meta($postid, 'propid', true)>0 && !isset($atts['ownerid']))
-	$propid = get_post_meta($postid, 'propid', true);
-else if (get_query_var('propid')>0 && !isset($atts['ownerid']))
-  $propid = get_query_var('propid');
-else if (!isset($atts['ownerid']))
-	$propid = intval(get_option('beds24_propid'));
+    $propid = false;
+    if (isset($atts['propid']))
+        $propid = intval($atts['propid']);
+    else if (get_post_meta($postid, 'propid', true)>0 && !isset($atts['ownerid']))
+        $propid = intval(get_post_meta($postid, 'propid', true));
+    else if (get_query_var('propid')>0 && !isset($atts['ownerid']))
+        $propid = intval(get_query_var('propid'));
+    else if (!isset($atts['ownerid']))
+        $propid = intval(get_option('beds24_propid'));
 
-if ($propid > 0)
-	$prop = '&amp;propid='.intval($propid);
-else if (isset($atts['propid']))
-	$prop = '&amp;propid='.intval($atts['propid']);
-else
-	$prop = '';
+    if ($propid > 0)
+        $prop = '&amp;propid='.intval($propid);
+    else if (isset($atts['propid']))
+        $prop = '&amp;propid='.intval($atts['propid']);
+    else
+        $prop = '';
 
 //roomid
 if (isset($atts['roomid']))
-	$roomid = $atts['roomid'];
+	$roomid = intval($atts['roomid']);
 else if (get_post_meta($postid, 'roomid', true)>0)
-	$roomid = get_post_meta($postid, 'roomid', true);
+	$roomid = intval(get_post_meta($postid, 'roomid', true));
 else if (get_query_var('roomid')>0)
-    $roomid = get_query_var('roomid');
+    $roomid = intval(get_query_var('roomid'));
 else
 	$roomid = intval(get_option('beds24_roomid'));
 
-$roomid = intval($roomid);
 if ($roomid > 0)
 	$room = '&amp;roomid='.intval($roomid);
 else if (isset($atts['roomid']))
@@ -241,9 +247,9 @@ else
 
 //number of dates displayed
 if (isset($atts['numdisplayed']))
-	$numdisplayed = $atts['numdisplayed'];
+	$numdisplayed = intval($atts['numdisplayed']);
 else
-	$numdisplayed = get_option('beds24_numdisplayed');
+	$numdisplayed = intval(get_option('beds24_numdisplayed'));
 if (isset($numdisplayed) && $numdisplayed!=-1)
 	$urlnumdisplayed = "&amp;numdisplayed=".urlencode(intval($numdisplayed));
 else
@@ -251,9 +257,9 @@ else
 
 //show calendar
 if (isset($atts['hidecalendar']))
-	$hidecalendar = $atts['hidecalendar'];
+	$hidecalendar = sanitize_text_field($atts['hidecalendar']);
 else
-	$hidecalendar = get_option('beds24_hidecalendar');
+	$hidecalendar = sanitize_text_field(get_option('beds24_hidecalendar'));
 if (isset($hidecalendar) && $hidecalendar!=-1)
 	$urlhidecalendar = "&amp;hidecalendar=".urlencode($hidecalendar);
 else
@@ -261,9 +267,9 @@ else
 
 //show header
 if (isset($atts['hideheader']))
-	$hideheader = $atts['hideheader'];
+	$hideheader = sanitize_text_field($atts['hideheader']);
 else
-	$hideheader = get_option('beds24_hideheader');
+	$hideheader = sanitize_text_field(get_option('beds24_hideheader'));
 if (isset($hideheader) && $hideheader!=-1)
 	$urlhideheader = "&amp;hideheader=".urlencode($hideheader);
 else
@@ -271,9 +277,9 @@ else
 
 //show footer
 if (isset($atts['hidefooter']))
-	$hidefooter = $atts['hidefooter'];
+	$hidefooter = sanitize_text_field($atts['hidefooter']);
 else
-	$hidefooter = get_option('beds24_hidefooter');
+	$hidefooter = sanitize_text_field(get_option('beds24_hidefooter'));
 if (isset($hidefooter) && $hidefooter!=-1)
 	$urlhidefooter = "&amp;hidefooter=".urlencode($hidefooter);
 else
@@ -281,24 +287,24 @@ else
 
 //lang
 if (isset($atts['lang']))
-	$lang = strtolower($atts['lang']);
+	$lang = sanitize_text_field(strtolower($atts['lang']));
 else if (get_post_meta($postid, 'lang', true))
-	$lang = strtolower(get_post_meta($postid, 'lang', true));
+	$lang = sanitize_text_field(strtolower(get_post_meta($postid, 'lang', true)));
 else
 	$lang = '';
 
 if ($lang)
-	$urllang = '&amp;lang='.$lang;
+	$urllang = '&amp;lang='.urlencode($lang);
 else
 	$urllang = '';
 
 //referer
 if (isset($atts['referer']))
-	$referer = strtolower($atts['referer']);
+	$referer = sanitize_text_field(strtolower($atts['referer']));
 else if (get_post_meta($postid, 'referer', true))
-	$referer = get_post_meta($postid, 'referer', true);
+	$referer = sanitize_text_field(get_post_meta($postid, 'referer', true));
 else
-	$referer = get_option('beds24_referer');
+	$referer = sanitize_text_field(get_option('beds24_referer'));
 
 if ($referer)
 	$urlreferer = '&amp;referer='.urlencode($referer);
@@ -307,20 +313,20 @@ else
 
 //domain
 if (isset($atts['domain']))
-	$domain = strtolower($atts['domain']);
+	$domain = sanitize_text_field(strtolower($atts['domain']));
 else if (get_post_meta($postid, 'domain', true))
-	$domain = get_post_meta($postid, 'domain', true);
+	$domain = sanitize_text_field(get_post_meta($postid, 'domain', true));
 else
-	$domain = get_option('beds24_domain');
+	$domain = sanitize_text_field(get_option('beds24_domain'));
 
 if (!$domain)
 	$domain = 'https://beds24.com';
 
 //scrolltop (for iframe)
 if (isset($atts['scrolltop']))
-	$scrolltop = strtolower($atts['scrolltop']);
+	$scrolltop = sanitize_text_field(strtolower($atts['scrolltop']));
 else if (get_post_meta($postid, 'scrolltop', true))
-	$scrolltop = strtolower(get_post_meta($postid, 'scrolltop', true));
+	$scrolltop = sanitize_text_field(strtolower(get_post_meta($postid, 'scrolltop', true)));
 else
 	$scrolltop = false;
 
@@ -328,22 +334,22 @@ else
 //checkin or show this many days from now
 $checkin = false;
 if (isset($_REQUEST['checkin']))
-	$checkin = $_REQUEST['checkin'];
+	$checkin = sanitize_text_field($_REQUEST['checkin']);
 else if (isset($_REQUEST['fdate_date']) && isset($_REQUEST['fdate_monthyear']))
-	$checkin = date('Y-m-d', strtotime($_REQUEST['fdate_monthyear'].'-'.$_REQUEST['fdate_date']));
+	$checkin = date('Y-m-d', strtotime(sanitize_text_field($_REQUEST['fdate_monthyear']).'-'.sanitize_text_field($_REQUEST['fdate_date'])));
 else if (isset($_SESSION['beds24-checkin']))
 	{
-	$checkin = $_SESSION['beds24-checkin'];
+	$checkin = sanitize_text_field($_SESSION['beds24-checkin']);
 	}
 else if (isset($atts['advancedays']))
 	{
-	$advancedays = $atts['advancedays'];
+	$advancedays = intval($atts['advancedays']);
 	if ($advancedays>=0)
 		$checkin = date('Y-m-d', strtotime('+'.$advancedays.' days'));
 	}
 else
 	{
-	$advancedays = get_option('beds24_advancedays');
+	$advancedays = intval(get_option('beds24_advancedays'));
 	if ($advancedays>=0)
 		$checkin = date('Y-m-d', strtotime('+'.$advancedays.' days'));
 	}
@@ -351,7 +357,7 @@ else
 $urlcheckin = '';
 if ($checkin)
 	{
-	$checkin = date('Y-m-d', strtotime($checkin));
+	$checkin = date('Y-m-d', strtotime(sanitize_text_field($checkin)));
 	if ($checkin < date('Y-m-d'))
 		$checkin = date('Y-m-d');
 	$_SESSION['beds24-checkin'] = $checkin;
@@ -361,13 +367,13 @@ if ($checkin)
 
 //default number of nights
 if (isset($_REQUEST['numnight']))
-	$numnight = $_REQUEST['numnight'];
+	$numnight = intval($_REQUEST['numnight']);
 else if (isset($_SESSION['beds24-numnight']))
-	$numnight = $_SESSION['beds24-numnight'];
+	$numnight = intval($_SESSION['beds24-numnight']);
 else if (isset($atts['numnight']))
-	$numnight = $atts['numnight'];
+	$numnight = intval($atts['numnight']);
 else
-	$numnight = get_option('beds24_numnight');
+	$numnight = intval(get_option('beds24_numnight'));
 $_SESSION['beds24-numnight'] = $numnight;
 if (isset($numnight) && !isset($atts['noselection']))
 	$urlnumnight = "&amp;numnight=".urlencode(intval($numnight));
@@ -376,28 +382,28 @@ else
 
 //number of guests
 if (isset($_REQUEST['numadult']))
-	$numadult = $_REQUEST['numadult'];
+	$numadult = intval($_REQUEST['numadult']);
 else if (isset($_SESSION['beds24-numadult']))
-	$numadult = $_SESSION['beds24-numadult'];
+	$numadult = intval($_SESSION['beds24-numadult']);
 else if (isset($atts['numadult']))
-	$numadult = $atts['numadult'];
+	$numadult = intval($atts['numadult']);
 else
-	$numadult = get_option('beds24_numadult');
-$_SESSION['beds24-numadult'] = $numadult;
+	$numadult = intval(get_option('beds24_numadult'));
+    $_SESSION['beds24-numadult'] = $numadult;
 if (isset($numadult) && !isset($atts['noselection']))
 	$urlnumadult = "&amp;numadult=".urlencode(intval($numadult));
 else
 	$urlnumadult = '';
 
 if (isset($_REQUEST['numchild']))
-	$numchild = $_REQUEST['numchild'];
+	$numchild = intval($_REQUEST['numchild']);
 else if (isset($_SESSION['beds24-numchild']))
-	$numchild = $_SESSION['beds24-numchild'];
+	$numchild = intval($_SESSION['beds24-numchild']);
 else if (isset($atts['numchild']))
-	$numchild = $atts['numchild'];
+	$numchild = intval($atts['numchild']);
 else
-	$numchild = get_option('beds24_numchild');
-$_SESSION['beds24-numchild'] = $numchild;
+	$numchild = intval(get_option('beds24_numchild'));
+    $_SESSION['beds24-numchild'] = $numchild;
 if (isset($numchild) && !isset($atts['noselection']))
 	$urlnumchild = "&amp;numchild=".urlencode(intval($numchild));
 else
@@ -407,11 +413,11 @@ else
 
 //default layout
 if (isset($_REQUEST['layout']))
-	$layout = $_REQUEST['layout'];
+	$layout = intval($_REQUEST['layout']);
 else if (isset($atts['layout']))
-	$layout = $atts['layout'];
+	$layout = intval($atts['layout']);
 else
-	$layout = get_option('beds24_layout');
+	$layout = intval(get_option('beds24_layout'));
 if (isset($layout) && $layout>0)
 	$urllayout = "&amp;layout=".urlencode(intval($layout));
 else
@@ -421,19 +427,19 @@ else
 $width = false;
 if (isset($atts['width']))
 	{
-	$width = $atts['width'];
+	$width = intval($atts['width']);
 	}
 else
-	$width = get_option('beds24_width');
+	$width = intval(get_option('beds24_width'));
 
 if ($width<100)
 	$width = 800;
 
 //height of target
 if (isset($atts['height']))
-	$height = $atts['height'];
+	$height = intval($atts['height']);
 else
-	$height = get_option('beds24_height');
+	$height = intval(get_option('beds24_height'));
 
 if ($height<100)
 	$height = 1600;
@@ -446,7 +452,7 @@ if ($height<100)
 //type=searchresult
 //type=embed
 if (isset($atts['type']))
-	$type = $atts['type'];
+	$type = sanitize_text_field($atts['type']);
 else
 	$type = 'embed';
 //	$type = get_option('beds24_type');
@@ -455,49 +461,49 @@ else
 //target=window
 //target=new
 if (isset($atts['target']))
-	$target = $atts['target'];
+	$target = sanitize_text_field($atts['target']);
 else if (get_option('beds24_target'))
-	$target = get_option('beds24_target');
+	$target = sanitize_text_field(get_option('beds24_target'));
 else
 	$target = 'window';
 
 
 
 if (isset($atts['display']))
-	$display = $atts['display'];
+	$display = sanitize_text_field($atts['display']);
 else
 	$display = '';
 
 $suffix = '_'.$ownerid.'_'.$propid.'_'.$roomid;
 if (isset($atts['targetid']))
 	{
-	$targetid = $atts['targetid'];
+	$targetid = sanitize_text_field($atts['targetid']);
 //	$target = 'none';
 	}
 else if (isset($atts['id']))
 	{
-	$targetid = $atts['id'];
+	$targetid = sanitize_text_field($atts['id']);
 	}
 else
 	$targetid = 'beds24target'.$suffix;
 
 //widget text
 if (isset($atts['text']))
-	$text = htmlspecialchars($atts['text']);
+	$text = sanitize_text_field(htmlspecialchars($atts['text']));
 else
 	$text = 'Book Now';
 
 //widget class
 if (isset($atts['class']))
-	$class = htmlspecialchars($atts['class']);
+	$class = sanitize_text_field(htmlspecialchars($atts['class']));
 else
 	$class = '';
 
 //target url custom parameters
 if (isset($atts['custom']))
-	$custom = $atts['custom'];
+	$custom = sanitize_text_field($atts['custom']);
 else
-	$custom = get_option('beds24_custom');
+	$custom = sanitize_text_field(get_option('beds24_custom'));
 if (substr($custom,0,1) != '&')
 	$custom = '&amp;'.$custom;
 
@@ -505,44 +511,44 @@ $style = 'cursor: pointer;';
 
 //widget font size
 if (isset($atts['fontsize']))
-	$style .= 'font-size: '.$atts['fontsize'].';';
+	$style .= 'font-size: '.esc_attr($atts['fontsize']).';';
 
 //widget color
 if (isset($atts['color']))
-	$style .= 'color: '.$atts['color'].';';
+	$style .= 'color: '.esc_attr($atts['color']).';';
 elseif (strlen(get_option('beds24_color')) >=3)
-	$style .= 'color: '.get_option('beds24_color').';';;
+	$style .= 'color: '.esc_attr(get_option('beds24_color')).';';
 
 //padding
 if (isset($atts['padding']))
-	$style .= 'padding: '.$atts['padding'].'px;';
+	$style .= 'padding: '.intval($atts['padding']).'px;';
 else
-	$style .= 'padding: '.get_option('beds24_padding').'px;';
+	$style .= 'padding: '.intval(get_option('beds24_padding')).'px;';
 
 $linkstyle = $style;
 
 //widget background color
 if (isset($atts['bgcolor']))
-	$style .= 'background-color: '.$atts['bgcolor'].';';
+	$style .= 'background-color: '.esc_attr($atts['bgcolor']).';';
 elseif (strlen(get_option('beds24_bgcolor')) >=3)
-	$style .= 'background-color: '.get_option('beds24_bgcolor').';';
+	$style .= 'background-color: '.esc_attr(get_option('beds24_bgcolor')).';';
 
 $boxstyle = $style;
 $buttonstyle = $style;
 
 if (isset($atts['width']))
-	$boxstyle .= 'max-width: '.$atts['width'].'px;';
+	$boxstyle .= 'max-width: '.esc_attr($atts['width']).'px;';
 
-$defaulthref = $domain.'/booking2.php';
+$defaulthref = esc_url($domain.'/booking2.php');
 
 //href target
 if (isset($atts['href']))
-	$href = $atts['href'];
+	$href = esc_url($atts['href']);
 else
 	$href = $defaulthref;
 
 $formurl = $href;
-$url = $href.'?1'.$owner.$prop.$room.$urlnumdisplayed.$urlhideheader.$urlhidefooter.$urlhidecalendar.$urlcheckin.$urlnumnight.$urlnumadult.$urlnumchild.$urllayout.$urllang.$urlreferer.$custom;
+$url = $href.'?1'.esc_attr($owner).esc_attr($prop).esc_attr($room).esc_attr($urlnumdisplayed).esc_attr($urlhideheader).esc_attr($urlhidefooter).esc_attr($urlhidecalendar).esc_attr($urlcheckin).esc_attr($urlnumnight).esc_attr($urlnumadult).esc_attr($urlnumchild).esc_attr($urllayout).esc_attr($urllang).esc_attr($urlreferer).esc_attr($custom);
 
 include ('beds24-translations.php');
 
@@ -567,23 +573,34 @@ else //iframe
 	{
 	if ($target != 'none')
 		$target = 'iframe';
-	$onclick = 'onclick="jQuery(\'#'.$targetid.'\').show();jQuery(\'#beds24book'.$suffix.'\').hide();return false;"';
+        $onclick = 'onclick="jQuery(\'#' . esc_js($targetid) . '\').show();jQuery(\'#beds24book' . esc_js($suffix) . '\').hide();return false;"';
+        $onclick = esc_attr($onclick);
 	if ($type != 'embed')
 		$display = 'none';
 	}
 
-
 if ($type == 'link')
 	{
-	$output .= '<a '.$thistarget.' class="'.$linkclass.$class.'" id="beds24book'.$suffix.'" style="'.$linkstyle.'" href="'.esc_url($url).'" '.$onclick.'>';
-	$output .= htmlspecialchars($text);
-	$output .= '</a>';
+        $output .= '<a ' . esc_attr($thistarget) .
+            ' class="' . esc_attr($linkclass . $class) . '" ' .
+            'id="beds24book' . esc_attr($suffix) . '" ' .
+            'style="' . esc_attr($linkstyle) . '" ' .
+            'href="' . esc_url($url) . '" ' .
+            esc_attr($onclick) . '>';
+        $output .= esc_html($text);
+        $output .= '</a>';
 	}
 else if ($type == 'button')
 	{
-	$output .= '<a '.$thistarget.' class="'.$linkclass.'" id="beds24book'.$suffix.'" style="text-decoration:none;" href="'.esc_url($url).'" '.$onclick.'>';
-	$output .= '<button class="'.$class.'" style="'.$buttonstyle.'">'.htmlspecialchars($text).'</button>';
-	$output .= '</a>';
+        $output .= '<a ' . esc_attr($thistarget) .
+            ' class="' . esc_attr($linkclass) . '" ' .
+            'id="beds24book' . esc_attr($suffix) . '" ' .
+            'style="text-decoration:none;" ' .
+            'href="' . esc_url($url) . '" ' .
+            esc_attr($onclick) . '>';
+        $output .= '<button class="' . esc_attr($class) . '" ' .
+            'style="' . esc_attr($buttonstyle) . '">' .
+            esc_html($text) . '</button></a>';
 	}
 else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 'searchresult')
 	{
@@ -595,7 +612,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 		if ($lang)
 			{
 			ob_start();
-			get_template_part('beds24-box-'.$lang);
+			get_template_part('beds24-box-'.sanitize_text_field($lang));
 			$searchbox = ob_get_clean();
 			}
 		if (!$searchbox)
@@ -604,7 +621,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 			get_template_part('beds24-box');
 			$searchbox = ob_get_clean();
 			}
-		$file =  plugin_dir_path( __FILE__ ) . 'theme-files/beds24-box-'.$lang.'.php';
+		$file =  plugin_dir_path( __FILE__ ) . 'theme-files/beds24-box-'.sanitize_text_field($lang).'.php';
 		if (!$searchbox && $lang && file_exists($file))
 			{
 			ob_start();
@@ -623,7 +640,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 		if ($lang)
 			{
 			ob_start();
-			get_template_part('beds24-strip-'.$lang);
+			get_template_part('beds24-strip-'.sanitize_text_field($lang));
 			$searchbox = ob_get_clean();
 			}
 		if (!$searchbox)
@@ -632,7 +649,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 			get_template_part('beds24-strip');
 			$searchbox = ob_get_clean();
 			}
-		$file =  plugin_dir_path( __FILE__ ) . 'theme-files/beds24-strip-'.$lang.'.php';
+		$file =  plugin_dir_path( __FILE__ ) . 'theme-files/beds24-strip-'.sanitize_text_field($lang).'.php';
 		if (!$searchbox && $lang && file_exists($file))
 			{
 			ob_start();
@@ -651,7 +668,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 			if ($lang)
 			{
 			ob_start();
-			get_template_part('beds24-searchbox-'.$lang);
+			get_template_part('beds24-searchbox-'.sanitize_text_field($lang));
 			$searchbox = ob_get_clean();
 			}
 		if (!$searchbox)
@@ -660,7 +677,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 			get_template_part('beds24-searchbox');
 			$searchbox = ob_get_clean();
 			}
-		$file = plugin_dir_path( __FILE__ ) . 'theme-files/beds24-searchbox-'.$lang.'.php';
+		$file = plugin_dir_path( __FILE__ ) . 'theme-files/beds24-searchbox-'.sanitize_text_field($lang).'.php';
 		if (!$searchbox && $lang && file_exists($file))
 		{
 		ob_start();
@@ -676,26 +693,32 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 		}
 
 
-	$output .= '<div id="beds24'.$type.$suffix.'" style="'.$boxstyle.'" class="beds24'.$type.'">';
-	$output .= '<form '.$thistarget.' id="beds24book'.$suffix.'" method="post" action="'.$formurl.'">';
+        $output .= '<div id="beds24' . esc_attr($type . $suffix) . '" ' .
+            'style="' . esc_attr($boxstyle) . '" ' .
+            'class="beds24' . esc_attr($type) . '">';
+        $output .= '<form ' . esc_attr($thistarget) . ' ' .
+            'id="beds24book' . esc_attr($suffix) . '" ' .
+            'method="post" ' .
+            'action="' . esc_url($formurl) . '">';
 	if ($ownerid > 0)
-		$output .= '<input type="hidden" name="ownerid" value="'.$ownerid.'">';
-	if ($propid > 0)
-		$output .= '<input type="hidden" name="propid" value="'.$propid.'">';
+        $output .= '<input type="hidden" name="ownerid" value="' . esc_attr($ownerid) . '">';
+
+        if ($propid > 0)
+		$output .= '<input type="hidden" name="propid" value="'.esc_attr($propid).'">';
 	if ($roomid > 0)
-		$output .= '<input type="hidden" name="roomid" value="'.$roomid.'">';
+		$output .= '<input type="hidden" name="roomid" value="'.esc_attr($roomid).'">';
 	if (isset($numdisplayed) && $numdisplayed!=-1)
-		$output .= '<input type="hidden" name="numdisplayed" value="'.$numdisplayed.'">';
+		$output .= '<input type="hidden" name="numdisplayed" value="'.esc_attr($numdisplayed).'">';
 	if (isset($hidecalendar) && $hidecalendar!=-1)
-		$output .= '<input type="hidden" name="hidecalendar" value="'.$hidecalendar.'">';
+		$output .= '<input type="hidden" name="hidecalendar" value="'.esc_attr($hidecalendar).'">';
 	if (isset($hideheader) && $hideheader!=-1)
-		$output .= '<input type="hidden" name="hideheader" value="'.$hideheader.'">';
+		$output .= '<input type="hidden" name="hideheader" value="'.esc_attr($hideheader).'">';
 	if (isset($hidefooter) && $hidefooter!=-1)
-		$output .= '<input type="hidden" name="hidefooter" value="'.$hidefooter.'">';
+		$output .= '<input type="hidden" name="hidefooter" value="'.esc_attr($hidefooter).'">';
 	if ($lang)
-		$output .= '<input type="hidden" name="lang" value="'.$lang.'">';
+		$output .= '<input type="hidden" name="lang" value="'.esc_attr($lang).'">';
 	if ($referer)
-		$output .= '<input type="hidden" name="referer" value="'.$referer.'">';
+		$output .= '<input type="hidden" name="referer" value="'.esc_attr($referer).'">';
 
 
 	$output .= $searchbox;
@@ -721,7 +744,13 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 	{
 	if (isset($_REQUEST['fdate_date']))
 		{
-		$xmlurl = 'https://api.beds24.com/getavailabilities.xml';
+		$xmlurl = esc_url_raw('https://api.beds24.com/getavailabilities.xml');
+
+        $ownerid = sanitize_text_field($ownerid);
+        $checkin = sanitize_text_field($checkin);
+        $numnight = intval($numnight);
+        $numadult = intval($numadult);
+        $numchild = intval($numchild);
 		$postarray = array( 'ownerid' => $ownerid, 'checkin' => $checkin, 'numnight' => $numnight, 'numadult' => $numadult , 'numchild' => $numchild );
 
 		$category = array();
@@ -747,7 +776,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 
 		foreach ($category as $key => $val)
 			{
-			$postarray['category'.$key] = $val;
+			$postarray['category'.$key] = intval($val);
 			}
 
 		$args = array(
@@ -763,7 +792,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 		$response = wp_remote_post($xmlurl, $args);
 
 		if ( is_wp_error( $response ) ) {
-			$error_message = $response->get_error_message();
+			$error_message = esc_html($response->get_error_message());
 			$output .=  "Something went wrong: $error_message";
 			return $output;
 		} else {
@@ -778,9 +807,9 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 			foreach ($xmlowner->property as $xmlproperty)
 				{
 				$propid = intval($xmlproperty['id']);
-				$name = $xmlproperty['name'];
-				$bestprice = $xmlproperty['bestPrice'];
-				$bookurl = $domain.'/booking2.php?propid='.$propid.'&amp;checkin='.$checkin.'&amp;numadult='.$numadult.'&amp;numchild='.$numchild.'&amp;numnight='.$numnight.$urlnumdisplayed.$urlhideheader.$urlhidefooter.$urlhidecalendar.$urlcheckin.$urllang.$urlreferer.$custom;
+				$name = sanitize_text_field($xmlproperty['name']);
+				$bestprice = sanitize_text_field($xmlproperty['bestPrice']);
+				$bookurl = esc_url($domain.'/booking2.php?propid='.$propid.'&amp;checkin='.$checkin.'&amp;numadult='.$numadult.'&amp;numchild='.$numchild.'&amp;numnight='.$numnight.$urlnumdisplayed.$urlhideheader.$urlhidefooter.$urlhidecalendar.$urlcheckin.$urllang.$urlreferer.$custom);
 				$propoutput = false;
 
 				$args = array('meta_key' => 'propid', 'meta_value'=> $propid);
@@ -792,7 +821,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 					if ($lang)
 						{
 						ob_start();
-						include(locate_template('beds24-prop-post-'.$lang));
+						include(locate_template('beds24-prop-post-'.sanitize_text_field($lang)));
 						$postoutput = ob_get_clean();
 						}
 					if (!$postoutput)
@@ -801,7 +830,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 						include(locate_template('beds24-prop-post'));
 						$postoutput = ob_get_clean();
 						}
-					$file = plugin_dir_path( __FILE__ ) . 'theme-files/beds24-prop-post-'.$lang.'.php';
+					$file = plugin_dir_path( __FILE__ ) . 'theme-files/beds24-prop-post-'.sanitize_text_field($lang).'.php';
 					if (!$postoutput && $lang && file_exists($file))
 						{
 						ob_start();
@@ -822,7 +851,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 					if ($lang)
 						{
 						ob_start();
-						get_template_part('beds24-prop-xml-'.$lang);
+						get_template_part('beds24-prop-xml-'.sanitize_text_field($lang));
 						$postoutput = ob_get_clean();
 						}
 					if (!$postoutput)
@@ -831,7 +860,7 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 						get_template_part('beds24-prop-xml');
 						$postoutput = ob_get_clean();
 						}
-					$file =  plugin_dir_path( __FILE__ ) . 'theme-files/beds24-prop-xml-'.$lang.'.php';
+					$file =  plugin_dir_path( __FILE__ ) . 'theme-files/beds24-prop-xml-'.sanitize_text_field($lang).'.php';
 					if (!$postoutput && $lang && file_exists($file))
 						{
 						ob_start();
@@ -856,15 +885,15 @@ else if ($type == 'box' || $type == 'strip' || $type == 'searchbox' || $type == 
 
 if ($type=='embed' || $target=='iframe') //iframe
 	{
-	$output .= '<div id="'.$targetid.'">';
+	$output .= '<div id="'.esc_attr($targetid).'">';
 	if ($scrolltop == 'no')
-		$output .= '<iframe src ="'.$url.'" width="'.$width.'" height="'.$height.'" style="max-width:100%;border:none;overflow:auto;"><p><a href="'.esc_url($url).'">'.htmlspecialchars($text).'</a></p></iframe>';
+		$output .= '<iframe src ="'.esc_url($url).'" width="'.esc_attr($width).'" height="'.esc_attr($height).'" style="max-width:100%;border:none;overflow:auto;"><p><a href="'.esc_url($url).'">'.esc_html($text).'</a></p></iframe>';
 	else
-		$output .= '<iframe onload="window.parent.parent.scrollTo(0,0)" src ="'.$url.'" width="'.$width.'" height="'.$height.'" style="max-width:100%;border:none;overflow:auto;"><p><a href="'.$url.'">'.htmlspecialchars($text).'</a></p></iframe>';
+		$output .= '<iframe onload="window.parent.parent.scrollTo(0,0)" src ="'.esc_url($url).'" width="'.esc_attr($width).'" height="'.esc_attr($height).'" style="max-width:100%;border:none;overflow:auto;"><p><a href="'.esc_url($url).'">'.esc_html($text).'</a></p></iframe>';
 	$output .= '</div>';
 	if ($display == 'none')
 		{
-		$output .= '<script>jQuery(document).ready(function($) {jQuery("#'.$targetid.'").hide(); });</script>';
+		$output .= '<script>jQuery(document).ready(function($) {jQuery("#'.esc_js($targetid).'").hide(); });</script>';
 		}
 	}
 
