@@ -3,7 +3,7 @@
 Plugin Name: Beds24 Online Booking
 Plugin URI: https://beds24.com
 Description: Beds24.com is a full featured online booking engine. The system is very flexible with many options for customization. The Beds24.com online booking system and channel manager is suitable for any type of accommodation such as hotels, motels, B&B's, hostels, vacation rentals, holiday homes, campgrounds and property management companies selling multiple properties as well as selling extras like tickets or tours. The plugin is free to use but you do need an account with Beds24.com. A free trial account is available <a href="https://beds24.com/join.html" target="_blank">here</a>
-Version: 2.0.28
+Version: 2.0.29
 Author: Mark Kinchin
 Author URI: https://beds24.com
 License: GPL2 or later
@@ -292,6 +292,9 @@ else if (get_post_meta($postid, 'lang', true))
 	$lang = sanitize_text_field(strtolower(get_post_meta($postid, 'lang', true)));
 else
 	$lang = '';
+
+$allowed_langs = ["en", "ar", "bg", "ca", "hr", "cs", "da", "de", "el", "es", "et", "fi", "fr", "he", "hu", "hy", "id", "is", "it", "ja", "ko", "lt", "lv", "my", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sv", "th", "tr", "vi", "zh", "zt"];
+$lang = in_array($lang, $allowed_langs) ? $lang : '';
 
 if ($lang)
 	$urllang = '&amp;lang='.urlencode($lang);

@@ -73,6 +73,9 @@ All payments go directly to the host. You can either collect payments after arri
 Yes. You may define multiple properties in Beds24.com and implement a search form that shows the guest a list of those available for their search criteria. 
 
 == Changelog ==
+= 2.0.29 =
+* fixed unrestricted language file inclusion
+
 = 2.0.28 =
 * fixed unescepted fields
 
