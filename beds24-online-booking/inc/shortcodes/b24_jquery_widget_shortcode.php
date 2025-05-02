@@ -23,6 +23,7 @@ $unique_id='b24_widget_'.uniqid();
 $b24Attr='{';
 foreach($newatts as $k => $v){
 	if(strlen($v)>0){
+        $v = esc_js($v);
 		if($v=='false' || $v=='true'){
 			$value=$v;
 		}
